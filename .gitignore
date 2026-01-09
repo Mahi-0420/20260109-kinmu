@@ -29,4 +29,6 @@ Homestead.json
 .phpactor.json
 auth.json
 
-db_config.php
+// 追加分
+# db_config.php やっぱ上げる
+.env
