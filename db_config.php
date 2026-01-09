@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Tokyo'); //時間設定
 // .env ファイルを読み込む関数（簡易版）
 function loadEnv($path) {
     if (!file_exists($path)) return;
