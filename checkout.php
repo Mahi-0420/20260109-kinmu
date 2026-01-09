@@ -1,15 +1,21 @@
 <?php
 include('db_config.php');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $jugyoin_id = $_POST['jugyoin_id'];
+// 現在「出勤中」の従業員のみ取得する
+$sql_active = "SELECT k.id as kiroku_id, j.name 
+               FROM kiroku k 
+               JOIN jugyoin j ON k.jugyoin_id = j.id 
+               WHERE k.end_work IS NULL";
+$stmt_active = $pdo->query($sql_active);
+$active_workers = $stmt_active->fetchAll();
 
-    if (!empty($jugyoin_id)) {
-        // その従業員の「退勤時刻が空」である最新の1件を更新する
-        $stmt = $pdo->prepare("UPDATE kiroku SET end_work = NOW() 
-                               WHERE jugyoin_id = ? AND end_work IS NULL 
-                               ORDER BY id DESC LIMIT 1");
-        $stmt->execute([$jugyoin_id]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $kiroku_id = $_POST['kiroku_id'];
+
+    if (!empty($kiroku_id)) {
+        // 対象レコードの end_work を現在時刻に更新
+        $stmt = $pdo->prepare("UPDATE kiroku SET end_work = NOW() WHERE id = ?");
+        $stmt->execute([$kiroku_id]);
         header('Location: index.php');
         exit;
     }
@@ -22,14 +28,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>退勤登録</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="checkout-page">
-    <h1>退勤登録</h1>
-    <form method="POST">
-        <label>従業員IDを入力してください：</label><br>
-        <input type="number" name="jugyoin_id" required>
-        <button type="submit">退勤</button>
-    </form>
-    <br>
-    <a href="index.php">一覧に戻る</a>
+<body>
+    <div class="container">
+        <h1>退勤登録</h1>
+        <form method="POST">
+            <label>退勤する従業員を選択してください：</label><br>
+            <select name="kiroku_id" required>
+                <option value="">-- 選択してください --</option>
+                <?php foreach ($active_workers as $worker): ?>
+                    <option value="<?= $worker['kiroku_id'] ?>">
+                        <?= htmlspecialchars($worker['name']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <br><br>
+            <button type="submit" class="btn-checkout">退勤</button>
+        </form>
+        <br>
+        <a href="index.php">戻る</a>
+    </div>
 </body>
 </html>
