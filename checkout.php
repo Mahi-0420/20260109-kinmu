@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>退勤登録</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="checkout-page">
     <div class="container">
         <h1>退勤登録</h1>
         <form method="POST">

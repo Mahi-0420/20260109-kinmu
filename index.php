@@ -23,7 +23,7 @@ $rows = $stmt->fetchAll();
     <title>勤怠記録一覧</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="index-page">
     <div class="container">
         <h1>勤怠記録一覧</h1>
         <div class="nav">
