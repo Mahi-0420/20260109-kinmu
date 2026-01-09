@@ -1,20 +1,23 @@
 <?php
 include('db_config.php');
 
-// SQLで名前の取得と給料計算を同時に行う
-// 勤務時間は TIMESTAMPDIFF(SECOND, ...) で秒単位で出し、3600で割って時間に変換
+// SQLで名前の取得と給料計算（時給1350円固定）を同時に行う
 $sql = "SELECT 
             j.name, 
             k.start_work, 
             k.end_work,
-            j.hourly_rate,
-            ROUND(TIMESTAMPDIFF(SECOND, k.start_work, k.end_work) / 3600 * j.hourly_rate) as salary
+            1350 as hourly_rate, -- 時給を1350円として定義
+            ROUND(TIMESTAMPDIFF(SECOND, k.start_work, k.end_work) / 3600 * 1350) as salary
         FROM kiroku k
         JOIN jugyoin j ON k.jugyoin_id = j.id
         ORDER BY k.start_work DESC";
 
-$stmt = $pdo->query($sql);
-$rows = $stmt->fetchAll();
+try {
+    $stmt = $pdo->query($sql);
+    $rows = $stmt->fetchAll();
+} catch (PDOException $e) {
+    die("エラーが発生しました: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -46,7 +49,13 @@ $rows = $stmt->fetchAll();
                     <td><?= htmlspecialchars($row['start_work']) ?></td>
                     <td><?= htmlspecialchars($row['end_work'] ?? '勤務中...') ?></td>
                     <td><?= number_format($row['hourly_rate']) ?>円</td>
-                    <td><?= $row['end_work'] ? number_format($row['salary']) . '円' : '-' ?></td>
+                    <td>
+                        <?php if ($row['end_work']): ?>
+                            <?= number_format($row['salary']) ?>円
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
+                    </td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
